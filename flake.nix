@@ -22,13 +22,10 @@
           python-pkgs.uvicorn
           python-pkgs.aiofiles
           python-pkgs.sqlalchemy
-
-          # Extra tools
-          python-pkgs.mypy
-          python-pkgs.setuptools
         ]))
 
         pkgs.pyright
+        pkgs.nodePackages.nodejs
       ];
     };
   };

@@ -16,14 +16,14 @@ from app.modules.auth import auth_controller
 def homepage_handler(dev: bool) -> Callable[[Request], Coroutine[Any, Any, Response]]:
   if dev:
     async def handler(_: Request) -> Response:
-      async with aiofiles.open("frontend/index.html") as f:
+      async with aiofiles.open("dist/index.html") as f:
         data = await f.read()
 
       return Response(data, media_type="text/html")
 
     return handler
 
-  with open("frontend/index.html") as f:
+  with open("dist/index.html") as f:
     data = f.read()
 
   response = Response(data, media_type="text/html")
@@ -44,7 +44,7 @@ async def lifespan(app: Starlette):
 
 app = Starlette(routes=[
   Route("/", homepage_handler(dev), methods=["GET"]),
-  Mount("/static", StaticFiles(directory="frontend/static"), name="static"),
+  Mount("/assets", StaticFiles(directory="dist/assets"), name="assets"),
   Mount("/auth", routes=auth_controller.routes)
 ], lifespan=lifespan)
 
