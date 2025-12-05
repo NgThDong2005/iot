@@ -15,7 +15,8 @@
           # User libraries
           python-pkgs.numpy
           python-pkgs.pydantic
-          python-pkgs.josepy
+          python-pkgs.email-validator
+          python-pkgs.python-jose
           python-pkgs.passlib
           python-pkgs.starlette
           python-pkgs.uvicorn

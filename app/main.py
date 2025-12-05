@@ -2,7 +2,7 @@ from collections.abc import Coroutine
 from contextlib import asynccontextmanager
 from os import environ as env
 from typing import Any, Callable
-from state import AppState
+from app.state import AppState
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
@@ -11,7 +11,7 @@ from starlette.staticfiles import StaticFiles
 import aiofiles
 import uvicorn
 
-from modules.auth import auth_controller
+from app.modules.auth import auth_controller
 
 def homepage_handler(dev: bool) -> Callable[[Request], Coroutine[Any, Any, Response]]:
   if dev:
@@ -48,7 +48,7 @@ app = Starlette(routes=[
   Mount("/auth", routes=auth_controller.routes)
 ], lifespan=lifespan)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   if dev:
     uvicorn.run('main:app', host='127.0.0.1', port=port, reload=True)
   else:
