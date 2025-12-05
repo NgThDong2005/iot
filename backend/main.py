@@ -1,65 +1,85 @@
-import subprocess
+import asyncio
 from collections.abc import Coroutine
 from contextlib import asynccontextmanager
 from os import environ as env
 from typing import Any, Callable
-from backend.state import AppState
+
+import aiofiles
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.routing import Route, Mount
+from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
-import aiofiles
 import uvicorn
+import watchfiles
 
 from backend.modules.auth import auth_controller
+from backend.state import AppState
+
 
 def homepage_handler(dev: bool) -> Callable[[Request], Coroutine[Any, Any, Response]]:
-  if dev:
-    async def handler(_: Request) -> Response:
-      async with aiofiles.open("dist/index.html") as f:
-        data = await f.read()
+	if dev:
 
-      return Response(data, media_type="text/html")
+		async def handler(_: Request) -> Response:
+			async with aiofiles.open("dist/index.html") as f:
+				data = await f.read()
 
-    return handler
+			return Response(data, media_type="text/html")
 
-  with open("dist/index.html") as f:
-    data = f.read()
+		return handler
 
-  response = Response(data, media_type="text/html")
+	with open("dist/index.html") as f:
+		data = f.read()
 
-  async def handler(_: Request) -> Response:
-    return response
+	response = Response(data, media_type="text/html")
 
-  return handler
+	async def handler(_: Request) -> Response:
+		return response
 
-dev = env.get('DEV') is not None
-port = int(env.get('PORT', default='3000'))
-host = env.get('HOST', default='0.0.0.0')
+	return handler
+
+
+dev = env.get("DEV") is not None
+port = int(env.get("PORT", default="3000"))
+host = env.get("HOST", default="0.0.0.0")
+
+
+async def build_frontend():
+	proc = await asyncio.create_subprocess_exec("npm", "run", "build")
+	await proc.communicate()
+
+
+async def frontend_watcher():
+	async for _ in watchfiles.awatch("frontend"):
+		try:
+			await build_frontend()
+		except asyncio.CancelledError:
+			break
+
 
 @asynccontextmanager
 async def lifespan(app: Starlette):
-  if dev:
-    subprocess.run(["npm", "run", "build"])
-  AppState.init(app)
-  yield
+	if dev:
+		await build_frontend()
+		task = asyncio.create_task(frontend_watcher())
+		AppState.init(app)
+		yield
+		task.cancel()
+	else:
+		AppState.init(app)
 
-app = Starlette(routes=[
-  Route("/", homepage_handler(dev), methods=["GET"]),
-  Mount("/assets", StaticFiles(directory="dist/assets"), name="assets"),
-  Mount("/auth", routes=auth_controller.routes)
-], lifespan=lifespan)
+
+app = Starlette(
+	routes=[
+		Route("/", homepage_handler(dev), methods=["GET"]),
+		Mount("/assets", StaticFiles(directory="dist/assets"), name="assets"),
+		Mount("/auth", routes=auth_controller.routes),
+	],
+	lifespan=lifespan,
+)
 
 if __name__ == "__main__":
-  if dev:
-    uvicorn.run(
-      app='backend.main:app',
-      host='127.0.0.1',
-      port=port,
-      reload=True,
-      reload_includes=["*.html", "*.ts"],
-      reload_dirs=["frontend", "backend"]
-    )
-  else:
-    uvicorn.run(app, host=host, port=port) 
+	if dev:
+		uvicorn.run("backend.main:app", host="127.0.0.1", port=port, reload=True)
+	else:
+		uvicorn.run(app, host=host, port=port)

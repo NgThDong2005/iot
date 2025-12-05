@@ -23,6 +23,8 @@
           python-pkgs.uvicorn
           python-pkgs.aiofiles
           python-pkgs.sqlalchemy
+
+          python-pkgs.ruff
         ]))
 
         pkgs.pyright
