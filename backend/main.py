@@ -7,11 +7,10 @@ from typing import Callable
 import aiofiles
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import Response, HTMLResponse
+from starlette.responses import HTMLResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 import uvicorn
-import watchfiles
 
 from backend.modules.auth import auth_controller
 from backend.modules.dashboard import dashboard_controller
@@ -45,28 +44,26 @@ port = int(env.get("PORT", default="3000"))
 host = env.get("HOST", default="0.0.0.0")
 
 
-async def build_frontend():
-	proc = await asyncio.create_subprocess_exec("npm", "run", "build")
-	await proc.communicate()
-
-
-async def frontend_watcher():
-	async for _ in watchfiles.awatch("frontend"):
-		try:
-			await build_frontend()
-		except asyncio.CancelledError:
-			break
-
-
 @asynccontextmanager
 async def lifespan(app: Starlette):
 	if dev:
-		await build_frontend()
-		task = asyncio.create_task(frontend_watcher())
+		proc = await asyncio.create_subprocess_exec(
+			"npm",
+			"run",
+			"build",
+			"--",
+			"--watch",
+			"--sourcemap",
+			"inline",
+			"--minify",
+			"false",
+		)
 		state = AppState.init(app)
 		yield
 		state.deinit()
-		task.cancel()
+		if proc.returncode is None:
+			proc.terminate()
+			await proc.wait()
 	else:
 		state = AppState.init(app)
 		yield

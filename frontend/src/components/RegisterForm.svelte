@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { apiPost } from '../utils/api'
 
-	interface Props {
+	type Props = {
 		onRegisterSuccess: () => void
 		onSwitchToLogin: () => void
 	}

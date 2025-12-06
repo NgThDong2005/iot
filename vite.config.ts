@@ -7,6 +7,9 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    modulePreload: {
+      polyfill: false,
+    },
   },
   plugins: [
     tailwindcss(),

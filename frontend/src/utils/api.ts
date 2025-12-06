@@ -1,4 +1,4 @@
-export interface FetchOptions extends RequestInit {
+export type FetchOptions = RequestInit & {
 	handleLogout?: () => void
 }
 

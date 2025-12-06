@@ -2,12 +2,12 @@
 	import { onMount } from 'svelte'
 	import { apiPost, apiGet } from '../utils/api'
 
-	interface Props {
+	type Props = {
 		username: string
 		onLogout: () => void
 	}
 
-	interface DashboardData {
+	type DashboardData = {
 		message?: string
 		devices?: string[]
 	}
