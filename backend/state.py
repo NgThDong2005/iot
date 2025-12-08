@@ -20,10 +20,10 @@ from paho.mqtt.client import Client
 from paho import mqtt
 
 
-MQTT_HOST = "646d30de4c774de1b93489fbfb112df9.s1.eu.hivemq.cloud"
-MQTT_PORT = 8883
-MQTT_USER = "fireguardiot6"
-MQTT_PASS = "Demo@123"
+MQTT_HOST = env.get("MQTT_HOST", "localhost") 
+MQTT_PORT = int(env.get("MQTT_PORT", 8883))
+MQTT_USER = env.get("MQTT_USER", "")
+MQTT_PASS = env.get("MQTT_PASS", "")
 
 def init_mqtt() -> Client :
 	client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
