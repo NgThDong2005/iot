@@ -58,6 +58,12 @@ class AppState:
 		return state
 
 	async def deinit(self) -> None:
+		if self.sensor_task is not None:
+			self.sensor_task.cancel()
+
+		for connection in self.ws_connections.values():
+			connection.close(code=1001, reason="Closing server")
+
 		self.db_engine.dispose()
 
 	@contextmanager
