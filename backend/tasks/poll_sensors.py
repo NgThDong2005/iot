@@ -35,6 +35,8 @@ async def poll_sensors(state: AppState) -> None:
 	temperature, gas = await fetch_sensor_data()
 	timestamp = datetime.now()
 
+	state.mqtt_client.publish("test", payload="Hello", qos=1)
+
 	with state.get_db() as db:
 		sensor_data = SensorData(timestamp=timestamp, temperature=temperature, gas=gas)
 		db.add(sensor_data)
