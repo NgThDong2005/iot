@@ -513,14 +513,6 @@
 										</div>
 
 										<div class="flex flex-row gap-2">
-											<div class="flex items-center gap-2">
-												<div
-													class="w-3 h-3 rounded-full {wsConnected ? 'bg-blue-500' : 'bg-gray-400'}"
-												></div>
-												<p class="text-sm text-gray-600">
-													{wsConnected ? 'Live' : 'Offline'}
-												</p>
-											</div>
 											<button
 												type="button"
 												title="sensor"
