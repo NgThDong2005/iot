@@ -28,6 +28,5 @@ __pycache__/
 data.db
 
 requirement.txt
-requirements.txt
 
 backend/.env
