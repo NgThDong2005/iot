@@ -26,7 +26,3 @@ dist-ssr
 .venv/
 __pycache__/
 data.db
-
-requirement.txt
-
-backend/.env

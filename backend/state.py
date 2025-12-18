@@ -1,32 +1,26 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import ssl
 from collections.abc import Awaitable, Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import datetime
 from os import environ as env
+from typing import cast
 
+import paho.mqtt.client as paho
 from openai import OpenAI
+from paho.mqtt.client import Client
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.applications import Starlette
 from starlette.requests import HTTPConnection
 from starlette.websockets import WebSocket
+
+from backend.models import Base, SensorData
 from backend.modules.websocket.websocket_service import broadcast_sensor_data
-
-from backend.models import SensorData
-from backend.models import Base
-
-from datetime import datetime
-from typing import cast
-
-import paho.mqtt.client as paho
-from paho.mqtt.client import Client
-
-import json
-
-import ssl
-
 
 MQTT_HOST = env.get("MQTT_HOST", "localhost")
 MQTT_PORT = int(env.get("MQTT_PORT", 8883))
@@ -116,12 +110,16 @@ class AppState:
 
 	@classmethod
 	def init(cls, app: Starlette) -> AppState:
-		db_url = env.get("DATABASE_URL", default="sqlite:///./data.db")
-		connect_args = {}
-		if db_url.startswith("sqlite"):
-			connect_args = {"check_same_thread": False}
-
-		engine = create_engine(db_url, connect_args=connect_args)
+		turso_url = env.get("TURSO_DATABASE_URL")
+		if turso_url is None:
+			engine = create_engine("sqlite+libsql:///data.db")
+		else:
+			engine = create_engine(
+				f"sqlite+{turso_url}?secure=true",
+				connect_args={
+					"auth_token": env.get("TURSO_AUTH_TOKEN"),
+				},
+			)
 
 		Base.metadata.create_all(bind=engine)
 

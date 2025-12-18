@@ -13,7 +13,7 @@
       buildInputs = [
         (pkgs.python312.withPackages (python-pkgs: [
           # User libraries
-          python-pkgs.numpy
+          python-pkgs.pip
           python-pkgs.pydantic
           python-pkgs.email-validator
           python-pkgs.python-jose
@@ -25,6 +25,7 @@
           python-pkgs.aiofiles
           python-pkgs.sqlalchemy
           python-pkgs.openai
+          python-pkgs.paho-mqtt
 
           python-pkgs.ruff
         ]))
