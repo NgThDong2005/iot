@@ -3,7 +3,7 @@
 
 	const WIDTH = 700
 	const HEIGHT = 300
-	const PADDINGX= 50
+	const PADDINGX = 50
 	const PADDINGY = 20
 
 	/* ------------------------------------

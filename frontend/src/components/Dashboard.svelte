@@ -683,19 +683,28 @@
 
 	<!-- Chat sidebar -->
 	{#if openAI}
-		<Chat onSendMessage={handleChatMessage} open={openAI} onClose={() => openAI = false} />
+		<Chat onSendMessage={handleChatMessage} open={openAI} onClose={() => (openAI = false)} />
 	{:else}
 		<!-- Chatbot SVG button -->
 		<button
 			class="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-colors"
-			onclick={() => openAI = true}
+			onclick={() => (openAI = true)}
 			aria-label="Open chat"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-					d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.652 0-3.195-.408-4.5-1.12L3 20l1.12-4.5C3.408 13.195 3 11.652 3 10c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="w-6 h-6"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.652 0-3.195-.408-4.5-1.12L3 20l1.12-4.5C3.408 13.195 3 11.652 3 10c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+				/>
 			</svg>
 		</button>
 	{/if}
-	
 </div>
