@@ -97,13 +97,17 @@
 
 	// Filter series with labels for legend
 	const legendItems = $derived(series.filter(s => s.label && s.data.length > 0))
+
+	// Legend position as percentage of container width
+	const legendLeft = (PADDINGX / WIDTH) * 100
 </script>
 
 <div class="relative" bind:this={chartContainer}>
 	<!-- Legend -->
 	{#if legendItems.length > 0}
 		<div
-			class="absolute top-2 right-2 flex flex-col gap-1 bg-white/90 rounded-lg px-3 py-2 shadow-sm border border-gray-100"
+			class="absolute top-4 flex flex-col gap-1 bg-white/90 rounded-lg px-3 py-2 shadow-sm border border-gray-100"
+			style="left: calc({legendLeft}% + 0.5rem)"
 		>
 			{#each legendItems as item}
 				<div class="flex items-center gap-2 text-xs">
