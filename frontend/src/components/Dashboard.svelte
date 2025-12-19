@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { apiPost, apiGet } from '../utils/api'
-	import LineChart from './LineChart.svelte'
+	import SensorHistory from './SensorHistory.svelte'
+	import PopupButton from './PopupButton.svelte'
 	import Chat, { type ChatMessage } from './Chat.svelte'
+	import chatIcon from './icons/chat.svg?raw'
 
 	type Props = {
 		username: string
@@ -49,10 +51,6 @@
 
 	let onBuzzer: boolean = $state(false)
 	let onRelay: boolean = $state(false)
-
-	let activeTab: 'temp' | 'gas' | 'all' = $state('all')
-
-	let openAI: boolean = $state(false)
 
 	const tempData = $derived(
 		sensorData
@@ -322,15 +320,15 @@
 		console.log(led)
 	})
 
-	function getTempColor(t) {
-		if (t >= 70) return '#d43008' // đỏ
-		if (t >= 50) return '#eab308' // vàng
+	function getTempColor(t: number) {
+		if (t >= 70) return '#d43008'
+		if (t >= 50) return '#eab308'
 		return '#22c55e' // xanh lá
 	}
 
-	function getGasColor(t) {
-		if (t >= 3000) return '#eab308' // vàng
-		return '#22c55e' // xanh lá
+	function getGasColor(t: number) {
+		if (t >= 3000) return '#eab308'
+		return '#22c55e'
 	}
 
 	function handleReset() {
@@ -673,49 +671,7 @@
 							</div>
 						</div>
 
-						<div class="w-full flex flex-col gap-4">
-							<h2 class="text-xl font-semibold">Data Sensor History (Latest 20 Entries)</h2>
-							<!-- Tabs -->
-							<div class="flex gap-4 mb-4">
-								<button
-									class="px-4 py-2 rounded-t-lg border-b-2"
-									class:border-blue-500={activeTab === 'all'}
-									class:border-gray-200={activeTab !== 'all'}
-									onclick={() => (activeTab = 'all')}
-								>
-									All
-								</button>
-								<button
-									class="px-4 py-2 rounded-t-lg border-b-2"
-									class:border-blue-500={activeTab === 'temp'}
-									class:border-gray-200={activeTab !== 'temp'}
-									onclick={() => (activeTab = 'temp')}
-								>
-									Temperature
-								</button>
-								<button
-									class="px-4 py-2 rounded-t-lg border-b-2"
-									class:border-blue-500={activeTab === 'gas'}
-									class:border-gray-200={activeTab !== 'gas'}
-									onclick={() => (activeTab = 'gas')}
-								>
-									Gas
-								</button>
-							</div>
-							<div class="w-full mx-auto">
-								<LineChart
-									series={[
-										...(activeTab !== 'gas'
-											? [{ data: tempData, label: 'Temperature', color: '#ef4444' }]
-											: []),
-										...(activeTab !== 'temp'
-											? [{ data: gasData, label: 'Gas', color: '#3b82f6' }]
-											: []),
-									]}
-									time={timeData}
-								/>
-							</div>
-						</div>
+						<SensorHistory {tempData} {gasData} {timeData} />
 					</div>
 				</div>
 			{/if}
@@ -723,36 +679,13 @@
 	</div>
 
 	<!-- Chat sidebar -->
-	{#if openAI}
-		<!-- Backdrop for mobile/tablet -->
-		<button
-			type="button"
-			class="fixed inset-0 bg-black/50 z-40 xl:hidden"
-			onclick={() => (openAI = false)}
-			aria-label="Close chat"
-		></button>
-		<Chat onSendMessage={handleChatMessage} onClose={() => (openAI = false)} />
-	{:else}
-		<!-- Chatbot SVG button -->
-		<button
-			class="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-colors"
-			onclick={() => (openAI = true)}
-			aria-label="Open chat"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="w-6 h-6"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.652 0-3.195-.408-4.5-1.12L3 20l1.12-4.5C3.408 13.195 3 11.652 3 10c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-				/>
-			</svg>
-		</button>
-	{/if}
+	<PopupButton
+		icon={chatIcon}
+		buttonClass="bg-indigo-600 text-white hover:bg-indigo-700"
+		ariaLabel="Open chat"
+	>
+		{#snippet children({ close })}
+			<Chat onSendMessage={handleChatMessage} onClose={close} />
+		{/snippet}
+	</PopupButton>
 </div>
