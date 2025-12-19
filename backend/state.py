@@ -19,13 +19,18 @@ from starlette.applications import Starlette
 from starlette.requests import HTTPConnection
 from starlette.websockets import WebSocket
 
-from backend.models import Base, SensorData
+from backend.models import Base, SensorData, User
 from backend.modules.websocket.websocket_service import broadcast_sensor_data
+from backend.modules.notification.notification_service import Notification
 
 MQTT_HOST = env.get("MQTT_HOST", "localhost")
 MQTT_PORT = int(env.get("MQTT_PORT", 8883))
 MQTT_USER = env.get("MQTT_USER", "")
 MQTT_PASS = env.get("MQTT_PASS", "")
+
+TEMP_LIMIT = 70
+EMAIL_COOLDOWN = 120
+notification = Notification()
 
 
 def init_mqtt(client: Client) -> Client:
@@ -39,6 +44,7 @@ def init_mqtt(client: Client) -> Client:
 
 	client.on_publish = on_publish
 
+
 	def on_message(client, userdata, msg) -> None:
 		payload_str = msg.payload.decode()
 		data = json.loads(payload_str)
@@ -47,6 +53,22 @@ def init_mqtt(client: Client) -> Client:
 		if temperature is not None and gas is not None:
 			print(f"Temperature: {temperature}, Gas: {gas}")
 			timestamp = datetime.now()
+
+			if temperature > TEMP_LIMIT and (timestamp - notification.last_send_email).total_seconds() > EMAIL_COOLDOWN:
+				with userdata.get_db() as db:
+					online_users = (
+						db.query(User.email)
+						.filter(User.is_active == True)
+						.all()
+					)
+
+					emails = [email for (email,) in online_users]
+
+					for email in emails:
+						notification.send_email(email)
+
+					notification.last_send_email = timestamp
+
 			with userdata.get_db() as db:
 				sensor_data = SensorData(
 					timestamp=timestamp, temperature=temperature, gas=gas
