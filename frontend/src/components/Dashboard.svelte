@@ -46,7 +46,7 @@
 	let temp = $derived(sensorData.at(-1)?.temperature ?? 20)
 	const maxTemp = 200
 	let gas = $derived(sensorData.at(-1)?.gas ?? 0)
-	const maxGas = 8000
+	const maxGas = 2000
 
 	let onBuzzer: boolean = $state(false)
 	let onRelay: boolean = $state(false)
@@ -58,7 +58,7 @@
 	function getLedState(temp: number, gas: number): StateLed {
 		console.log(temp, ' - ', gas)
 		if (temp >= 70) return '#d43008'
-		if (temp >= 50 || gas >= 3000) return '#eab308'
+		if (temp >= 50 || gas >= 800) return '#eab308'
 		return '#22c55e'
 	}
 
@@ -302,7 +302,7 @@
 	}
 
 	function getGasColor(t: number) {
-		if (t >= 3000) return '#eab308'
+		if (t >= 800) return '#eab308'
 		return '#22c55e'
 	}
 
